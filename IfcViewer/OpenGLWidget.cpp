@@ -1,11 +1,8 @@
 #include "OpenGLWidget.h"
 
-#include <QDebug>
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QOpenGLContext>
-#include <QElapsedTimer>
-
 
 OpenGLWidget::OpenGLWidget(qreal dpiScale, QWidget *parent) :
     QOpenGLWidget(parent),
@@ -207,7 +204,11 @@ void OpenGLWidget::wheelEvent(QWheelEvent *event) {
 }
 
 
-void OpenGLWidget::setSceneObjects(std::unique_ptr<std::vector<SceneData::Object>>&& upObjects) {
+void OpenGLWidget::setSceneObjects(std::unique_ptr<std::vector<SceneData::Object>>&& upObjects)
+{
+    m_upObjects = nullptr;
+    if(!upObjects)
+        return;
 
     m_upObjects = std::move(upObjects);
 

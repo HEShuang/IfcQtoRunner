@@ -6,6 +6,10 @@ IfcPreviewWidget::IfcPreviewWidget(QWidget *parent) : QTreeWidget(parent)
 
 void IfcPreviewWidget::loadTree(const std::unique_ptr<DataNode::Base>& upTreeRoot)
 {
+    clear();
+    if(!upTreeRoot)
+        return;
+
     std::function< void (QTreeWidgetItem*, const std::unique_ptr<DataNode::Base>&) > createWidgetItem
         = [&createWidgetItem](QTreeWidgetItem* pParentItem, const std::unique_ptr<DataNode::Base>& upNode){
 
