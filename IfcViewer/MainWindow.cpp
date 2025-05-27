@@ -3,7 +3,7 @@
 
 #include <QTreeWidgetItem>
 #include <QFileDialog>
-#include <QDebug>
+#include <QElapsedTimer>
 
 #include "IfcPreview.h"
 #include "IfcPreviewWidget.h"
@@ -13,17 +13,22 @@ MainWindow::MainWindow(qreal dpiScale, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_dpiScale(dpiScale)
-    , m_p3DView(nullptr)
+    , m_pPreviewTree(new IfcPreviewWidget)
+    , m_p3DView(new OpenGLWidget(m_dpiScale))
 {
     ui->setupUi(this);
 
+    m_pPreviewTree->setHeaderHidden(true);
+
     QVBoxLayout *layoutTree = new QVBoxLayout(ui->frameTree);
-    m_pPreviewTree = new IfcPreviewWidget;
+    layoutTree->setContentsMargins(0,0,0,0);
     layoutTree->addWidget(m_pPreviewTree);
 
     QVBoxLayout *layout3D = new QVBoxLayout(ui->frame3D);
-    m_p3DView = new OpenGLWidget(m_dpiScale);
+    layout3D->setContentsMargins(0,0,0,0);
     layout3D->addWidget(m_p3DView);
+
+    ui->splitter->setSizes(QList<int>{250, 750});
 
     connect(ui->btLoad, &QPushButton::clicked, this, &MainWindow::loadIfcFile);
 }
@@ -40,10 +45,14 @@ void MainWindow::loadIfcFile()
     if(m_sCurrentFile.isEmpty())
         return;
 
-    IfcPreview ifcPreview(m_sCurrentFile.toStdString());
+    ui->labelStatus->setText(m_sCurrentFile);
 
+    IfcPreview ifcPreview(m_sCurrentFile.toStdString());
     m_pPreviewTree->loadTree(ifcPreview.createPreviewTree());
 
+    QElapsedTimer timer;
+    timer.start();
     m_p3DView->setSceneObjects(ifcPreview.parseGeometry());
+    ui->statusbar->showMessage(QString("Geometry parsing: %1 ms").arg(timer.elapsed()));
 }
 
