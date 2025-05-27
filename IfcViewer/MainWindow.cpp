@@ -25,8 +25,7 @@ MainWindow::MainWindow(qreal dpiScale, QWidget *parent)
     m_p3DView = new OpenGLWidget(m_dpiScale);
     layout3D->addWidget(m_p3DView);
 
-    connect(ui->btLoad, &QPushButton::clicked, this, &MainWindow::loadPreviewTree);
-    connect(ui->bt3D, &QPushButton::clicked, this, &MainWindow::load3DModel);
+    connect(ui->btLoad, &QPushButton::clicked, this, &MainWindow::loadIfcFile);
 }
 
 MainWindow::~MainWindow()
@@ -34,29 +33,17 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::loadPreviewTree()
+void MainWindow::loadIfcFile()
 {
-    QString filters = "IFC files (*.ifc)";
-    QFileDialog fileDialog(this, "Import Ifc", QString(), filters);
-    fileDialog.setFileMode(QFileDialog::ExistingFile);
-    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-    if(!fileDialog.exec())
+    m_sCurrentFile.clear();
+    m_sCurrentFile = QFileDialog::getOpenFileName(this, tr("Open IFC File"), ".", tr("IFC Files (*.ifc)"));
+    if(m_sCurrentFile.isEmpty())
         return;
-
-    const auto& selectedFiles = fileDialog.selectedFiles();
-    m_sCurrentFile = selectedFiles.first();
 
     IfcPreview ifcPreview(m_sCurrentFile.toStdString());
-    if(!ifcPreview.execute())
-    {
-        qDebug() << "preivew execution failed";
-        return;
-    }
-    m_pPreviewTree->loadTree(ifcPreview.getTreeRoot());
 
+    m_pPreviewTree->loadTree(ifcPreview.createPreviewTree());
+
+    m_p3DView->setSceneObjects(ifcPreview.parseGeometry());
 }
 
-void MainWindow::load3DModel()
-{
-    m_p3DView->loadFile(m_sCurrentFile.toStdString());
-}

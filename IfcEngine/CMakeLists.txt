@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(IfcEngine LANGUAGES CXX)
+project(IfcCore LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -27,25 +27,25 @@ message(STATUS "OCC libs: ${OCC_LIBRARIES}")
 include(model/model.cmake)
 include(serializer/serializer.cmake)
 
-add_library(IfcEngine STATIC
+add_library(IfcCore STATIC
   ${MODEL_SOURCES}
-  ${SERIALIZER_SOURCES}
+  ${PARSE_SOURCES}
 )
 
-target_include_directories(IfcEngine
+target_include_directories(IfcCore
   PUBLIC
     ${Eigen_INCLUDE_DIR}
     ${IFCOPENSHELL_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR}
     ${OCC_INCLUDE_DIRS}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/model>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/serializer>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/parse>
 )
-target_link_libraries(IfcEngine
+target_link_libraries(IfcCore
   PRIVATE
     ${IFCOPENSHELL_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OCC_LIBRARIES}
 )
 
-target_compile_definitions(IfcEngine PRIVATE IFCENGINE_LIBRARY_BUILD)
+target_compile_definitions(IfcCore PRIVATE IFCENGINE_LIBRARY_BUILD)

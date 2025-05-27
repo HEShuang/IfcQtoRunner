@@ -27,8 +27,7 @@ private:
     IfcPreviewWidget* m_pPreviewTree;
     OpenGLWidget* m_p3DView;
 
-    void loadPreviewTree();
-    void load3DModel();
+    void loadIfcFile();
 
 };
 #endif // MAINWINDOW_H

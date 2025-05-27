@@ -75,11 +75,12 @@ public:
      *    Storey2
      *      ...
      * @param ifcFile: The input ifc file
-     * @param pRootNode: The result preview tree root
+     * @return spRootNode: The result preview tree root
      **/
 
-    void createPreviewTree(IfcParse::IfcFile& ifcFile, DataNode::Base* pRootNode)
+    std::unique_ptr<DataNode::Base> createPreviewTree(IfcParse::IfcFile& ifcFile)
     {
+        auto spRootNode = std::make_unique<DataNode::Base>();
         auto pIfcProjects = ifcFile.instances_by_type<IfcProject>();
 
         HashRel hashRelContains, hashRelAggregates, hashRelVoids;
@@ -145,7 +146,7 @@ public:
         };
 
         for (auto pProject : *pIfcProjects)
-            buildTreeUntillStorey(pRootNode, pProject);
+            buildTreeUntillStorey(spRootNode.get(), pProject);
 
 
         //add the given object's guid to the given storey recursively
@@ -200,6 +201,8 @@ public:
                     pStoreyNode->addChild( make_unique<DataNode::IfcClass>(pair2.first, pair2.second.size(), pair2.second) );
             }
         }
+
+        return spRootNode;
     }
 
 };
