@@ -7,14 +7,14 @@
 
 #include "IfcPreview.h"
 #include "IfcPreviewWidget.h"
-#include "OpenGLWidget.h"
+#include "OpenGLWidgetDummy.h"
 
 MainWindow::MainWindow(qreal dpiScale, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_dpiScale(dpiScale)
     , m_pPreviewTree(new IfcPreviewWidget)
-    , m_p3DView(new OpenGLWidget(m_dpiScale))
+    , m_pGLWidget(new OpenGLWidgetDummy(m_dpiScale))
 {
     ui->setupUi(this);
 
@@ -26,7 +26,7 @@ MainWindow::MainWindow(qreal dpiScale, QWidget *parent)
 
     QVBoxLayout *layout3D = new QVBoxLayout(ui->frame3D);
     layout3D->setContentsMargins(0,0,0,0);
-    layout3D->addWidget(m_p3DView);
+    layout3D->addWidget(m_pGLWidget);
 
     ui->splitter->setSizes(QList<int>{250, 750});
 
@@ -50,9 +50,10 @@ void MainWindow::loadIfcFile()
     IfcPreview ifcPreview(m_sCurrentFile.toStdString());
     m_pPreviewTree->loadTree(ifcPreview.createPreviewTree());
 
+    //parse geometry once then load all
     QElapsedTimer timer;
     timer.start();
-    m_p3DView->setSceneObjects(ifcPreview.parseGeometry());
+    m_pGLWidget->setSceneObjects(ifcPreview.parseGeometry());
     ui->statusbar->showMessage(QString("Geometry parsing: %1 ms").arg(timer.elapsed()));
 }
 

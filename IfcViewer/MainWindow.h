@@ -10,7 +10,7 @@ class MainWindow;
 QT_END_NAMESPACE
 
 class IfcPreviewWidget;
-class OpenGLWidget;
+class OpenGLWidgetDummy;
 
 class MainWindow : public QMainWindow
 {
@@ -25,7 +25,7 @@ private:
     qreal m_dpiScale;
     QString m_sCurrentFile;
     IfcPreviewWidget* m_pPreviewTree;
-    OpenGLWidget* m_p3DView;
+    OpenGLWidgetDummy* m_pGLWidget;
 
     void loadIfcFile();
 
