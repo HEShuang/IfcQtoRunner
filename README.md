@@ -11,9 +11,10 @@
 
 * **Import** IFC files using IfcOpenShell
 * **Extract and display** the project structure (✅ Done)
-* **Visualize** geometry via the IfcOpenShell Python API (⚙️ Ongoing)
+* **Visualize** geometry with Qt OpenGL (✅ Done)
+* **Improve 3D experience** by progressive rending (⚙️ Ongoing)
 * **Perform** quantity take‑offs (🚧 Upcoming)
-
+  
 ## Purpose
 
 * **Support evolving IFC standards** — adapt easily to new schema versions (IFC2x3, IFC4.x, future IFC5 …)
@@ -24,8 +25,11 @@
 ## Features
 
 * **Structure Preview**: Browse building hierarchies down to storeys and elements
-* **Geometry Viewer**: In‑progress 3D rendering powered by IfcOpenShell’s Python API
+* **Geometry Viewer**: 3D rendering powered Qt OpenGL
+* **Progressive Rendering**: Ongoing feature
 * **Quantity Take‑off**: Upcoming feature for automated count, area, and volume reporting
+
+<img width="691" alt="Screenshot 2025-05-27 at 11 23 27" src="https://github.com/user-attachments/assets/9e0b3e34-8c35-4bed-b7fa-7df4bd022a89" />
 
 ## License
 
