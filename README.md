@@ -18,7 +18,6 @@
 ## Purpose
 
 * **Support evolving IFC standards** — adapt easily to new schema versions (IFC2x3, IFC4.x, future IFC5 …)
-* **Integrate Python in C++** — leverage IfcOpenShell’s Python API from native code
 * **Use modern C++** — C++17/20 features, multi-threading, move semantics, efficient containers
 * **Enable fast quantity take‑off** — rapid standard IFC quantity computations for AEC workflows
 
