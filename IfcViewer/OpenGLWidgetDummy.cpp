@@ -1,10 +1,10 @@
-#include "OpenGLWidget.h"
+#include "OpenGLWidgetDummy.h"
 
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QOpenGLContext>
 
-OpenGLWidget::OpenGLWidget(qreal dpiScale, QWidget *parent) :
+OpenGLWidgetDummy::OpenGLWidgetDummy(qreal dpiScale, QWidget *parent) :
     QOpenGLWidget(parent),
     m_dpiScale(dpiScale),
     m_program(nullptr),
@@ -21,7 +21,7 @@ OpenGLWidget::OpenGLWidget(qreal dpiScale, QWidget *parent) :
     setMouseTracking(true);
 }
 
-OpenGLWidget::~OpenGLWidget()
+OpenGLWidgetDummy::~OpenGLWidgetDummy()
 {
     makeCurrent(); // Essential to delete GL resources in the correct context
     if (m_program) delete m_program;
@@ -31,7 +31,7 @@ OpenGLWidget::~OpenGLWidget()
     doneCurrent();
 }
 
-void OpenGLWidget::initializeGL()
+void OpenGLWidgetDummy::initializeGL()
 {
     initializeOpenGLFunctions(); // Initialize QOpenGLFunctions_3_2_Core
 
@@ -86,14 +86,14 @@ void OpenGLWidget::initializeGL()
     glDisable(GL_CULL_FACE);
 }
 
-void OpenGLWidget::resizeGL(int w, int h)
+void OpenGLWidgetDummy::resizeGL(int w, int h)
 {
     glViewport(0, 0, w * m_dpiScale, h * m_dpiScale); // Adjust viewport for DPI
     m_projectionMatrix.setToIdentity();
     m_projectionMatrix.perspective(45.0f, (float)w / h, 0.1f, 1000.0f); // FOV, Aspect, Near, Far
 }
 
-void OpenGLWidget::paintGL()
+void OpenGLWidgetDummy::paintGL()
 {
     if(!m_upObjects)
         return;
@@ -118,6 +118,9 @@ void OpenGLWidget::paintGL()
     // Loop through your parsed IFC geometry and draw each group
     for (const auto& object : *m_upObjects.get())
     {
+        if(!object.meshes)
+            continue;
+
         QMatrix4x4 modelMatrix(object.transform.m);
 
         for(const auto& mesh : *object.meshes.get())
@@ -161,12 +164,12 @@ void OpenGLWidget::paintGL()
 }
 
 // --- Camera Control (Simplified Trackball-like) ---
-void OpenGLWidget::mousePressEvent(QMouseEvent *event) {
+void OpenGLWidgetDummy::mousePressEvent(QMouseEvent *event) {
     m_lastMousePos = event->pos();
     event->accept();
 }
 
-void OpenGLWidget::mouseMoveEvent(QMouseEvent *event) {
+void OpenGLWidgetDummy::mouseMoveEvent(QMouseEvent *event) {
     if (event->buttons() & Qt::LeftButton) {
         QPoint diff = event->pos() - m_lastMousePos;
         float dx = diff.x() * 0.2f; // Sensitivity
@@ -187,11 +190,11 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent *event) {
     event->accept();
 }
 
-void OpenGLWidget::mouseReleaseEvent(QMouseEvent *event) {
+void OpenGLWidgetDummy::mouseReleaseEvent(QMouseEvent *event) {
     event->accept();
 }
 
-void OpenGLWidget::wheelEvent(QWheelEvent *event) {
+void OpenGLWidgetDummy::wheelEvent(QWheelEvent *event) {
     float delta = event->angleDelta().y();
     if (delta > 0) {
         m_cameraDistance *= 0.9f; // Zoom in
@@ -204,7 +207,7 @@ void OpenGLWidget::wheelEvent(QWheelEvent *event) {
 }
 
 
-void OpenGLWidget::setSceneObjects(std::unique_ptr<std::vector<SceneData::Object>>&& upObjects)
+void OpenGLWidgetDummy::setSceneObjects(std::unique_ptr<std::vector<SceneData::Object>>&& upObjects)
 {
     m_upObjects = nullptr;
     if(!upObjects)
@@ -225,3 +228,4 @@ void OpenGLWidget::setSceneObjects(std::unique_ptr<std::vector<SceneData::Object
 
     update(); // Request redraw
 }
+

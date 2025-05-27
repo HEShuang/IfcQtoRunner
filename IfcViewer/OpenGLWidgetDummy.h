@@ -1,5 +1,5 @@
-#ifndef OPENGLWIDGET_H
-#define OPENGLWIDGET_H
+#ifndef OPENGLWIDGETDUMMY_H
+#define OPENGLWIDGETDUMMY_H
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
@@ -11,12 +11,16 @@
 
 #include "SceneData.h"
 
-
-class OpenGLWidget: public QOpenGLWidget, protected QOpenGLFunctions
+/*
+ * Dummy opengl widget:
+ * load and render all geometries once
+ * with no support for adding/removing objects
+ * */
+class OpenGLWidgetDummy: public QOpenGLWidget, protected QOpenGLFunctions
 {
 public:
-    OpenGLWidget(qreal dpiScale, QWidget *parent = nullptr);
-    ~OpenGLWidget();
+    OpenGLWidgetDummy(qreal dpiScale, QWidget *parent = nullptr);
+    ~OpenGLWidgetDummy();
 
 public slots:
     void setSceneObjects(std::unique_ptr<std::vector<SceneData::Object>>&& upObjects);
@@ -52,4 +56,4 @@ private:
     std::unique_ptr<std::vector<SceneData::Object>> m_upObjects = nullptr;
 };
 
-#endif // OPENGLWIDGET_H
+#endif // OPENGLWIDGETDUMMY_H

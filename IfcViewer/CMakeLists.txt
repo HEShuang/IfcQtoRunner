@@ -17,8 +17,8 @@ set(PROJECT_SOURCES
         MainWindow.cpp
         MainWindow.h
         MainWindow.ui
-        OpenGLWidget.cpp
-        OpenGLWidget.h
+        OpenGLWidgetDummy.cpp
+        OpenGLWidgetDummy.h
         IfcPreviewWidget.h
         IfcPreviewWidget.cpp
 )
