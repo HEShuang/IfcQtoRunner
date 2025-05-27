@@ -14,13 +14,12 @@
 
 class OpenGLWidget: public QOpenGLWidget, protected QOpenGLFunctions
 {
-
 public:
     OpenGLWidget(qreal dpiScale, QWidget *parent = nullptr);
     ~OpenGLWidget();
 
 public slots:
-    void loadFile(const std::string& filePath);
+    void setSceneObjects(std::unique_ptr<std::vector<SceneData::Object>>&& upObjects);
 
 protected:
     void initializeGL() override;
@@ -50,7 +49,7 @@ private:
     float m_cameraDistance;
     QPoint m_lastMousePos;
 
-    std::vector<SceneData::Object> m_sceneObjects;
+    std::unique_ptr<std::vector<SceneData::Object>> m_upObjects = nullptr;
 };
 
 #endif // OPENGLWIDGET_H

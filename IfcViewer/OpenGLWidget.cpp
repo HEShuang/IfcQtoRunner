@@ -6,10 +6,6 @@
 #include <QOpenGLContext>
 #include <QElapsedTimer>
 
-#include <ifcparse/IfcFile.h>
-#include <ifcgeom/Iterator.h>
-
-#include "IfcPreview.h"
 
 OpenGLWidget::OpenGLWidget(qreal dpiScale, QWidget *parent) :
     QOpenGLWidget(parent),
@@ -102,6 +98,9 @@ void OpenGLWidget::resizeGL(int w, int h)
 
 void OpenGLWidget::paintGL()
 {
+    if(!m_upObjects)
+        return;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_program->bind();
@@ -120,7 +119,7 @@ void OpenGLWidget::paintGL()
     m_program->setUniformValue("lightColor", QVector3D(1.0f, 1.0f, 1.0f));  // White light
 
     // Loop through your parsed IFC geometry and draw each group
-    for (const auto& object : m_sceneObjects)
+    for (const auto& object : *m_upObjects.get())
     {
         QMatrix4x4 modelMatrix(object.transform.m);
 
@@ -207,17 +206,10 @@ void OpenGLWidget::wheelEvent(QWheelEvent *event) {
     event->accept();
 }
 
-// --- IFC Parsing Logic ---
-void OpenGLWidget::loadFile(const std::string& filePath) {
 
-    m_sceneObjects.clear();
-    IfcPreview ifcPreview(filePath);
+void OpenGLWidget::setSceneObjects(std::unique_ptr<std::vector<SceneData::Object>>&& upObjects) {
 
-    QElapsedTimer timer;
-    timer.start();
-
-    ifcPreview.parseGeometry(m_sceneObjects);
-    qDebug() << "parseGeometry time:" << timer.elapsed();
+    m_upObjects = std::move(upObjects);
 
     // After parsing, set the initial camera view based on the loaded geometry
     // (You'll need bounding box calculation for your custom geometry)

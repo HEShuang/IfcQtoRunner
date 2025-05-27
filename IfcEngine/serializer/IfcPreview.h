@@ -10,27 +10,22 @@
 class IfcPreview
 {
     std::string m_sFile;
-    std::unique_ptr<DataNode::Base> m_upTreeRoot = std::make_unique<DataNode::Base>();
-
+    IfcParse::IfcFile m_ifcFile;
 
 public:
-    IfcPreview(const std::string& file): m_sFile(file) {}
+    IfcPreview(const std::string& file);
 
-    bool execute();
-    const auto& getTreeRoot() {return m_upTreeRoot;}
-
+    std::unique_ptr<DataNode::Base> createPreviewTree();
 
     /**
      * Parses the geometry from the IFC file.
-     * @param sceneObjects Output vector to be filled with parsed scene objects.
-     * Each SceneObject contains its transformation and a list of meshes.
-     * Mesh vertices are in local coordinates and should be transformed by
-     * SceneObject::transform to get world coordinates.
-     * @return True if parsing was successful, false otherwise.
+     * Create a list of scene objects
+     * Each scene object contains its transformation and a list of meshes.
+     * Mesh vertices are in local coordinates and should be transformed to get world coordinates.
+     * @return pointer to the list of created scene objects
      */
-    bool parseGeometry(std::vector<SceneData::Object>& sceneObjects);
+    std::unique_ptr<std::vector<SceneData::Object>> parseGeometry();
 
-    //bool parseGeometryOSG(std::vector<osg::ref_ptr<osg::MatrixTransform>>& osgMatrixTransforms);
 };
 
 #endif // IFCPREVIEW_H
