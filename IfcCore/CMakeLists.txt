@@ -25,7 +25,7 @@ message(STATUS "OCC include: ${OCC_INCLUDE_DIRS}")
 message(STATUS "OCC libs: ${OCC_LIBRARIES}")
 
 include(model/model.cmake)
-include(serializer/serializer.cmake)
+include(parse/parse.cmake)
 
 add_library(IfcCore STATIC
   ${MODEL_SOURCES}

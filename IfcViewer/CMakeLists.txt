@@ -51,7 +51,7 @@ target_link_libraries(IfcViewer
   Qt${QT_VERSION_MAJOR}::Widgets
   Qt${QT_VERSION_MAJOR}::OpenGL
   Qt${QT_VERSION_MAJOR}::OpenGLWidgets
-  IfcEngine
+  IfcCore
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
