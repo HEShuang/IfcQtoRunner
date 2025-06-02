@@ -32,6 +32,7 @@ MainWindow::MainWindow(qreal dpiScale, QWidget *parent)
     ui->splitter->setSizes(QList<int>{250, 750});
 
     connect(ui->btLoad, &QPushButton::clicked, this, &MainWindow::loadIfcFile);
+    connect(ui->btClear, &QPushButton::clicked, this, &MainWindow::clearIfc);
 }
 
 MainWindow::~MainWindow()
@@ -42,7 +43,7 @@ MainWindow::~MainWindow()
 void MainWindow::loadIfcFile()
 {
     m_sCurrentFile.clear();
-    m_sCurrentFile = QFileDialog::getOpenFileName(this, tr("Open IFC File"), ".", tr("IFC Files (*.ifc)"));
+    m_sCurrentFile = QFileDialog::getOpenFileName(this, tr("Open IFC File"), "/Users/she/Downloads", tr("IFC Files (*.ifc)"));
     if(m_sCurrentFile.isEmpty())
         return;
 
@@ -69,3 +70,10 @@ void MainWindow::loadIfcFile()
 */
 }
 
+void MainWindow::clearIfc()
+{
+    m_sCurrentFile.clear();
+    ui->labelStatus->clear();
+    m_pPreviewTree->clear();
+    m_pGLWidget->clearScene();
+}

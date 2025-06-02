@@ -31,6 +31,7 @@ private:
     IfcParseController* m_pParseController = nullptr;
 
     void loadIfcFile();
+    void clearIfc();
 
 };
 #endif // MAINWINDOW_H
