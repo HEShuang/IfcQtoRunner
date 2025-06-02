@@ -21,6 +21,11 @@ set(PROJECT_SOURCES
         OpenGLWidgetDummy.h
         IfcPreviewWidget.h
         IfcPreviewWidget.cpp
+        IfcParseController.h
+        IfcParseController.cpp
+        OpenGLWidget.h
+        OpenGLWidget.cpp
+        QtRegistration.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

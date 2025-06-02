@@ -9,7 +9,9 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+class IfcParseController;
 class IfcPreviewWidget;
+class OpenGLWidget;
 class OpenGLWidgetDummy;
 
 class MainWindow : public QMainWindow
@@ -24,8 +26,9 @@ private:
     Ui::MainWindow *ui;
     qreal m_dpiScale;
     QString m_sCurrentFile;
-    IfcPreviewWidget* m_pPreviewTree;
-    OpenGLWidgetDummy* m_pGLWidget;
+    IfcPreviewWidget* m_pPreviewTree = nullptr;
+    OpenGLWidget* m_pGLWidget = nullptr;
+    IfcParseController* m_pParseController = nullptr;
 
     void loadIfcFile();
 

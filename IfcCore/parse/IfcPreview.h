@@ -26,6 +26,11 @@ public:
      */
     std::unique_ptr<std::vector<SceneData::Object>> parseGeometry();
 
+    // Define callback types
+    using Callback_ObjectReady = std::function<void(std::shared_ptr<SceneData::Object> objectData)>;
+    using Callback_ParseFinished = std::function<void(bool success, const std::string& message)>;
+
+    void parseGeometryStream(Callback_ObjectReady onObjectReady, Callback_ParseFinished onParseFinished);
 };
 
 #endif // IFCPREVIEW_H
