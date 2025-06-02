@@ -52,7 +52,7 @@ public:
         std::string geometryId;             // Internal ID of the geometry representation, used for instancing
         std::string guid;
         Matrix4x4 transform;                // Local-to-world transformation for this object's meshes
-        std::shared_ptr<std::vector<Mesh>> meshes;           // List of meshes that make up this object
+        std::shared_ptr<std::vector<Mesh>> meshes = nullptr;           // List of meshes that make up this object
         // std::string ifcProductGlobalId;  // Optional: IfcGloballyUniqueId of the product
     };
 

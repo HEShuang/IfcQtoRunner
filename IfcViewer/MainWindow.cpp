@@ -7,14 +7,15 @@
 
 #include "IfcPreview.h"
 #include "IfcPreviewWidget.h"
-#include "OpenGLWidgetDummy.h"
+#include "IfcParseController.h"
+#include "OpenGLWidget.h"
 
 MainWindow::MainWindow(qreal dpiScale, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_dpiScale(dpiScale)
     , m_pPreviewTree(new IfcPreviewWidget)
-    , m_pGLWidget(new OpenGLWidgetDummy(m_dpiScale))
+    , m_pGLWidget(new OpenGLWidget(m_dpiScale))
 {
     ui->setupUi(this);
 
@@ -50,10 +51,21 @@ void MainWindow::loadIfcFile()
     IfcPreview ifcPreview(m_sCurrentFile.toStdString());
     m_pPreviewTree->loadTree(ifcPreview.createPreviewTree());
 
+    m_pGLWidget->clearScene(); // Clear previous model
+
+    if (!m_pParseController) { // Create controller if it doesn't exist
+        m_pParseController = new IfcParseController(this); // 'this' is QObject parent
+        connect(m_pParseController, &IfcParseController::objectReadyForOpenGL, m_pGLWidget, &OpenGLWidget::addNewObject);
+        //connect(m_pParseController, &IfcParseController::parsingComplete, this, &MainWindow::handleParsingCompletion);
+    }
+    m_pParseController->startParsing(m_sCurrentFile);
+
+/*
     //parse geometry once then load all
     QElapsedTimer timer;
     timer.start();
     m_pGLWidget->setSceneObjects(ifcPreview.parseGeometry());
     ui->statusbar->showMessage(QString("Geometry parsing: %1 ms").arg(timer.elapsed()));
+*/
 }
 

@@ -3,9 +3,13 @@
 #include <QApplication>
 #include <QSurfaceFormat>
 
+#include "QtRegistration.h"
+
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    registerQtMetaType();
 
     // --- Configure OpenGL Context ---
     QSurfaceFormat format;
@@ -14,7 +18,7 @@ int main(int argc, char *argv[])
 
     // Request a Core Profile OpenGL 3.2 context (or higher, e.g., 4,1 for macOS)
     // 3.2 is a good common baseline
-    format.setVersion(3, 2);
+    format.setVersion(3, 3);
     format.setProfile(QSurfaceFormat::CoreProfile);
     //format.setOption(QSurfaceFormat::DebugContext); // Request debug context for logging errors
 
