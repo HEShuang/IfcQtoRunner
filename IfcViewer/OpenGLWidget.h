@@ -35,8 +35,8 @@ struct RenderableMeshGL {
 struct RenderableObjectGL {
     QMatrix4x4 transform; // Model transform for this object
     QList<std::shared_ptr<RenderableMeshGL>> meshes; // Each object can have multiple meshes (e.g., per material)
-    std::string guid;
-    std::string type;
+    QString guid;
+    QString type;
 };
 
 class OpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
@@ -49,6 +49,9 @@ public:
 public slots:
     void addNewObject(std::shared_ptr<SceneData::Object> pObject); // New slot for progressive loading
     void clearScene();
+    void setVisibility(const QString& guid, bool visible);
+    void selectObjects(const QSet<QString>& guids);
+    void deselect();
 
 protected:
     void initializeGL() override;
@@ -61,12 +64,12 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
 
 private:
-    void updateCamera(); // Keep your camera logic
-
     qreal m_dpiScale;
     QOpenGLShaderProgram *m_program;
 
     QList<RenderableObjectGL> m_renderableObjects; // Stores all displayable objects
+    QSet<QString> m_hiddenGuids;
+    QSet<QString> m_selectedGuids;
 
     // Camera parameters
     QMatrix4x4 m_projectionMatrix;
@@ -80,10 +83,7 @@ private:
 
     QPoint m_lastMousePos;
 
-    // --- Configurable Speeds ---
-    float m_rotationSpeed = 0.25f;
-    float m_panSpeed = 0.01f;   // This might need significant tuning based on your scene scale
-    float m_zoomSensitivity = 0.1f; // Percentage change per wheel step
+
 
 };
 

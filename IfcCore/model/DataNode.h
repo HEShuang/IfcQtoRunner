@@ -39,10 +39,10 @@ public:
 
         std::string m_ifcClass;
         int m_objectsCount;
-        std::vector<std::string> m_objectsGuids;
+        //std::vector<std::string> m_objectsGuids;
 
-        IfcClass(const std::string& ifcClass, int nObjects, const std::vector<std::string>& objGuids)
-            : Base(staticType), m_ifcClass(ifcClass), m_objectsCount(nObjects), m_objectsGuids(objGuids) {}
+        IfcClass(const std::string& ifcClass, int nObjects)
+            : Base(staticType), m_ifcClass(ifcClass), m_objectsCount(nObjects) {}
     };
 
     class IfcObject : public Base
@@ -65,7 +65,7 @@ public:
         std::string m_guid;
         std::string m_name;
         boost::optional<double> m_elevation;
-        std::unordered_map<std::string, std::vector<std::string>> m_objectGuidsByType;
+        std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> m_objectGuidsNamesByType; //object type _ list of (<guid, name>)
 
         Storey(){}
         Storey(const std::string& guid, const std::string& name, const boost::optional<double>& elevation):m_guid(guid), m_name(name), m_elevation(elevation) {}

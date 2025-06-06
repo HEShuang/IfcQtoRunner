@@ -112,7 +112,7 @@ public:
 
             auto type = pIfcObject->declaration().name();
             auto guid = pIfcObject->GlobalId();
-            auto name = pIfcObject->Name().value_or(type + " " + guid);
+            auto name = pIfcObject->Name().value_or("");
 
 
             if (pIfcObject->declaration().is(Schema::IfcBuildingStorey::Class()))
@@ -150,12 +150,13 @@ public:
 
 
         //add the given object's guid to the given storey recursively
-        std::function<void(DataNode::Storey*, IfcObjectDefinition*)> addObjectToStorey = [&](DataNode::Storey* pStorey, IfcObjectDefinition* pObject) {
+        std::function<void(DataNode::Storey*, IfcObjectDefinition*)> addObjectToStorey = [&](DataNode::Storey* pStorey, IfcObjectDefinition* pIfcObject) {
 
-            auto objectGuid = pObject->GlobalId();
-            auto type = pObject->declaration().name();
+            auto objectGuid = pIfcObject->GlobalId();
+            auto type = pIfcObject->declaration().name();
+            auto name = pIfcObject->Name().value_or("");
 
-            pStorey->m_objectGuidsByType[type].push_back(objectGuid);
+            pStorey->m_objectGuidsNamesByType[type].push_back({objectGuid, name});
 
 
             //add related objects to storey recursively
@@ -197,8 +198,15 @@ public:
                 auto pStoreyNode = pBuildingNode->addChild( make_unique<DataNode::IfcObject>(upStorey->m_guid, upStorey->m_name, "IfcBuildingStorey") );
 
                 //create ifcClass nodes and add to storey node
-                for (auto pair2 : upStorey->m_objectGuidsByType)
-                    pStoreyNode->addChild( make_unique<DataNode::IfcClass>(pair2.first, pair2.second.size(), pair2.second) );
+                for (auto pair2 : upStorey->m_objectGuidsNamesByType)
+                {
+                    auto pClassNode = pStoreyNode->addChild( make_unique<DataNode::IfcClass>(pair2.first, pair2.second.size()) );
+
+                    //create ifcObject nodes of the same ifc class
+                    for (const auto& pair_guid_name : pair2.second)
+                        pClassNode->addChild( make_unique<DataNode::IfcObject>(pair_guid_name.first, pair_guid_name.second, pair2.first));
+
+                }
             }
         }
 

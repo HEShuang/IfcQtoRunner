@@ -4,15 +4,41 @@
 #include <QOpenGLContext>
 #include <QDebug>
 
+namespace {
+    // --- Configurable Speeds ---
+    constexpr float m_rotationSpeed = 0.25f;
+    constexpr float m_panSpeed = 0.01f;   // This might need significant tuning based on your scene scale
+    constexpr float m_zoomSensitivity = 0.1f; // Percentage change per wheel step
+
+    constexpr float m_outlineScaleFactor = 1.03f;
+    constexpr QVector3D m_highlightColor = QVector3D(1.0f,1.0f,0.0f);
+}
+
 OpenGLWidget::OpenGLWidget(qreal dpiScale, QWidget *parent) :
     QOpenGLWidget(parent),
     m_dpiScale(dpiScale),
     m_program(nullptr)
 {
-    m_cameraPosition = QVector3D(5.0f, 5.0f, 5.0f);
+    // Initialize camera parameters (as in your existing code)
+    m_cameraPosition = QVector3D(0.0f, -10.0f, 5.0f); // Example: Pull back Y, Z is up
     m_cameraTarget = QVector3D(0.0f, 0.0f, 0.0f);
-    m_cameraUp = QVector3D(0.0f, 0.0f, 1.0f);
-    m_cameraDistance = m_cameraPosition.length();
+    m_cameraOrientation = QQuaternion(); // Initialize to identity
+    // Derive distance and initial up vector correctly for Z-up
+    // If camera is at (0, -D, H) looking at (0,0,0) with Z world up:
+    // Initial view direction is (0, D, -H).normalize()
+    // Initial right is cross((0,D,-H), (0,0,1)).normalize()
+    // Initial up is cross(right, viewDir).normalize()
+    // For simplicity, let's use lookAt to set initial orientation (can be done once)
+    QMatrix4x4 initialViewMatrix;
+    initialViewMatrix.lookAt(m_cameraPosition, m_cameraTarget, QVector3D(0.0f, 0.0f, 1.0f)); // World Z is UP
+    m_cameraOrientation = QQuaternion::fromRotationMatrix(initialViewMatrix.normalMatrix()).conjugated(); // Conjugate if view matrix to world
+    m_cameraDistance = (m_cameraPosition - m_cameraTarget).length();
+    m_cameraUp = m_cameraOrientation.rotatedVector(QVector3D(0.0f, 1.0f, 0.0f)); // Camera's local Y is its "up"
+
+    // Ensure initial position matches distance and orientation
+    QVector3D offsetDirectionWorld = m_cameraOrientation.rotatedVector(QVector3D(0.0f, 0.0f, 1.0f)); // Camera's local +Z in world
+    m_cameraPosition = m_cameraTarget - offsetDirectionWorld * m_cameraDistance; // Look from position towards target
+
 
     setMouseTracking(true);
 }
@@ -25,67 +51,7 @@ OpenGLWidget::~OpenGLWidget()
     doneCurrent();
 }
 
-void OpenGLWidget::initializeGL()
-{
-    initializeOpenGLFunctions();
-
-    const char *vertexShaderSource = R"(
-        #version 330 core
-        layout (location = 0) in vec3 aPos;
-        layout (location = 1) in vec3 aNormal;
-        uniform mat4 model;
-        uniform mat4 view;
-        uniform mat4 projection;
-
-        out vec3 Normal;
-        out vec3 FragPos;
-        out vec4 VertColor;
-
-        void main() {
-            FragPos = vec3(model * vec4(aPos, 1.0));
-            Normal = mat3(transpose(inverse(model))) * aNormal;
-            gl_Position = projection * view * model * vec4(aPos, 1.0);
-            VertColor = vec4(0.8, 0.8, 0.8, 1.0);
-        }
-    )";
-
-    const char *fragmentShaderSource = R"(
-        #version 330 core
-        out vec4 FragColor;
-
-        in vec4 VertColor; // Passed material color
-
-        uniform vec3 objectColor; // Material color passed from C++
-        // uniform float alpha_from_cpp; // If you decide to pass sanitized alpha separately
-
-        void main() {
-            FragColor = vec4(objectColor, VertColor.a);
-        }
-    )";
-
-    m_program = new QOpenGLShaderProgram(this);
-    if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource)) {
-        qWarning() << "Vertex shader compilation error:" << m_program->log();
-    }
-    if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource)) {
-        qWarning() << "Fragment shader compilation error:" << m_program->log();
-    }
-    if (!m_program->link()) {
-        qWarning() << "Shader program linking error:" << m_program->log();
-    }
-
-    glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-}
-
-void OpenGLWidget::resizeGL(int w, int h) {
-    // Adjust viewport for DPI, ensure h is not zero
-    if (h == 0) h = 1;
-    glViewport(0, 0, static_cast<GLsizei>(w * m_dpiScale), static_cast<GLsizei>(h * m_dpiScale));
-    m_projectionMatrix.setToIdentity();
-    m_projectionMatrix.perspective(45.0f, (float)w / h, 0.1f, 1000.0f);
-}
+//-------------------- public slots -------------------------//
 
 void OpenGLWidget::clearScene() {
     makeCurrent();
@@ -95,6 +61,7 @@ void OpenGLWidget::clearScene() {
         }
     }
     m_renderableObjects.clear();
+    m_hiddenGuids.clear();
     doneCurrent();
     update(); // Request a repaint of the now empty scene
 }
@@ -110,8 +77,8 @@ void OpenGLWidget::addNewObject(std::shared_ptr<SceneData::Object> pObject) {
     makeCurrent(); // CRITICAL: Need an active OpenGL context to create buffers
 
     RenderableObjectGL roGL;
-    roGL.guid = pObject->guid;
-    roGL.type = pObject->type;
+    roGL.guid = QString::fromStdString(pObject->guid);
+    roGL.type = QString::fromStdString(pObject->type);
 
     // Convert SceneData::Matrix4x4 to QMatrix4x4
     const float* m = pObject->transform.m;
@@ -172,6 +139,102 @@ void OpenGLWidget::addNewObject(std::shared_ptr<SceneData::Object> pObject) {
     qDebug() << "Added object GUID:" << QString::fromStdString(pObject->guid) << "to render queue. Total objects:" << m_renderableObjects.size();
 }
 
+void OpenGLWidget::setVisibility(const QString& guid, bool visible)
+{
+    bool changed = false;
+    if (visible) {
+        if (m_hiddenGuids.remove(guid)) {
+            changed = true;
+        }
+    } else { // Hide
+        if (!m_hiddenGuids.contains(guid)) {
+            m_hiddenGuids.insert(guid);
+            changed = true;
+        }
+    }
+
+    if (changed) update();
+}
+
+void OpenGLWidget::selectObjects(const QSet<QString>& guids)
+{
+    m_selectedGuids = guids;
+    update();
+}
+
+void OpenGLWidget::deselect()
+{
+    if(!m_selectedGuids.isEmpty())
+    {
+        m_selectedGuids.clear();
+        update();
+    }
+}
+
+
+//-------------------- OpenGL -------------------------//
+
+void OpenGLWidget::initializeGL()
+{
+    initializeOpenGLFunctions();
+
+    const char *vertexShaderSource = R"(
+        #version 330 core
+        layout (location = 0) in vec3 aPos;
+        layout (location = 1) in vec3 aNormal;
+        uniform mat4 model;
+        uniform mat4 view;
+        uniform mat4 projection;
+
+        out vec3 Normal;
+        out vec3 FragPos;
+        out vec4 VertColor;
+
+        void main() {
+            FragPos = vec3(model * vec4(aPos, 1.0));
+            Normal = mat3(transpose(inverse(model))) * aNormal;
+            gl_Position = projection * view * model * vec4(aPos, 1.0);
+            VertColor = vec4(0.8, 0.8, 0.8, 1.0);
+        }
+    )";
+
+    const char *fragmentShaderSource = R"(
+        #version 330 core
+        out vec4 FragColor;
+
+        in vec4 VertColor; // Passed material color
+
+        uniform vec3 objectColor; // Material color passed from C++
+        // uniform float alpha_from_cpp; // If you decide to pass sanitized alpha separately
+
+        void main() {
+            FragColor = vec4(objectColor, VertColor.a);
+        }
+    )";
+
+    m_program = new QOpenGLShaderProgram(this);
+    if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource)) {
+        qWarning() << "Vertex shader compilation error:" << m_program->log();
+    }
+    if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource)) {
+        qWarning() << "Fragment shader compilation error:" << m_program->log();
+    }
+    if (!m_program->link()) {
+        qWarning() << "Shader program linking error:" << m_program->log();
+    }
+
+    glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
+}
+
+void OpenGLWidget::resizeGL(int w, int h) {
+    // Adjust viewport for DPI, ensure h is not zero
+    if (h == 0) h = 1;
+    glViewport(0, 0, static_cast<GLsizei>(w * m_dpiScale), static_cast<GLsizei>(h * m_dpiScale));
+    m_projectionMatrix.setToIdentity();
+    m_projectionMatrix.perspective(45.0f, (float)w / h, 0.1f, 1000.0f);
+}
+
 void OpenGLWidget::paintGL() {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -191,7 +254,26 @@ void OpenGLWidget::paintGL() {
     m_program->setUniformValue("lightPos", QVector3D(m_cameraPosition.x()+10, m_cameraPosition.y()+10, m_cameraPosition.z()+10)); // Light relative to camera
     m_program->setUniformValue("lightColor", QVector3D(1.0f, 1.0f, 1.0f));
 
+    //Pass 1 : Draw normally
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    QList<RenderableObjectGL> selected;
+
     for (auto& roGL : m_renderableObjects) {
+
+        if(m_hiddenGuids.contains(roGL.guid)) continue;
+
+        bool isSelected = false;
+
+        if(m_selectedGuids.contains(roGL.guid)){
+            selected.push_back(roGL);
+            isSelected = true;
+        }
+
         m_program->setUniformValue("model", roGL.transform);
 
         for (auto& meshGL : roGL.meshes) {
@@ -201,13 +283,53 @@ void OpenGLWidget::paintGL() {
 
             // VBOs and attribute pointers are already configured in the VAO.
             // We just need to set uniforms that might change per mesh (like color).
-            m_program->setUniformValue("objectColor", meshGL->color.toVector3D());
+            if(isSelected)
+                m_program->setUniformValue("objectColor", m_highlightColor);
+            else
+                m_program->setUniformValue("objectColor", meshGL->color.toVector3D());
 
             glDrawArrays(GL_TRIANGLES, 0, meshGL->vertexCount);
         }
     }
+
+    // --- PASS 2: Draw outline for the selected object ---
+    if(!selected.isEmpty())
+    {
+        glCullFace(GL_FRONT);
+        glDepthMask(GL_FALSE);
+        glPolygonOffset(1.0f, 1.0f);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+
+
+        for (auto& roGL : selected) {
+
+            QMatrix4x4 scaledModelMatrix = roGL.transform;
+            // Scaling should be around the object's center, or it will shift.
+            // For a simple start, local scale is used.
+            // A more robust method is to push vertices along normals in a shader.
+            scaledModelMatrix.scale(m_outlineScaleFactor);
+
+            m_program->setUniformValue("model", scaledModelMatrix);
+            m_program->setUniformValue("objectColor", m_highlightColor);
+
+            for (auto& meshGL : roGL.meshes) {
+                if (meshGL->vertexCount == 0 || !meshGL->vao.isCreated()) continue;
+                QOpenGLVertexArrayObject::Binder vaoBinder(&meshGL->vao);
+                glDrawArrays(GL_TRIANGLES, 0, meshGL->vertexCount);
+            }
+        }
+
+        //Reset GL states
+        glCullFace(GL_BACK);
+        glDepthMask(GL_TRUE);
+        glDisable(GL_POLYGON_OFFSET_FILL);
+
+    }
+
     m_program->release();
 }
+
+//-------------------- mouse control -------------------------//
 
 void OpenGLWidget::mousePressEvent(QMouseEvent *event) {
     m_lastMousePos = event->pos();
