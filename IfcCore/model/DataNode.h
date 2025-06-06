@@ -21,6 +21,7 @@ public:
     {
     public:
         Base(Type t = Type::Base): m_type(t) {}
+        virtual ~Base(){}
 
         Type type() const {return m_type;}
 
