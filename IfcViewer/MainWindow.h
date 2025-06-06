@@ -32,6 +32,7 @@ private:
 
     void loadIfcFile();
     void clearIfc();
+    void handleParseGeometryCompleted();
 
 };
 #endif // MAINWINDOW_H

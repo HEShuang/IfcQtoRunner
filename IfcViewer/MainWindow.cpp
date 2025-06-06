@@ -33,6 +33,8 @@ MainWindow::MainWindow(qreal dpiScale, QWidget *parent)
 
     connect(ui->btLoad, &QPushButton::clicked, this, &MainWindow::loadIfcFile);
     connect(ui->btClear, &QPushButton::clicked, this, &MainWindow::clearIfc);
+    connect(m_pPreviewTree, &IfcPreviewWidget::objectVisibilityChanged, m_pGLWidget, &OpenGLWidget::setVisibility);
+    connect(m_pPreviewTree, &IfcPreviewWidget::objectSelectionChanged, m_pGLWidget, &OpenGLWidget::selectObjects);
 }
 
 MainWindow::~MainWindow()
@@ -57,7 +59,7 @@ void MainWindow::loadIfcFile()
     if (!m_pParseController) { // Create controller if it doesn't exist
         m_pParseController = new IfcParseController(this); // 'this' is QObject parent
         connect(m_pParseController, &IfcParseController::objectReadyForOpenGL, m_pGLWidget, &OpenGLWidget::addNewObject);
-        //connect(m_pParseController, &IfcParseController::parsingComplete, this, &MainWindow::handleParsingCompletion);
+        connect(m_pParseController, &IfcParseController::parsingComplete, this, &MainWindow::handleParseGeometryCompleted);
     }
     m_pParseController->startParsing(m_sCurrentFile);
 
@@ -68,6 +70,11 @@ void MainWindow::loadIfcFile()
     m_pGLWidget->setSceneObjects(ifcPreview.parseGeometry());
     ui->statusbar->showMessage(QString("Geometry parsing: %1 ms").arg(timer.elapsed()));
 */
+}
+
+void MainWindow::handleParseGeometryCompleted()
+{
+    m_pPreviewTree->handleLoadGeometryFinished();
 }
 
 void MainWindow::clearIfc()
