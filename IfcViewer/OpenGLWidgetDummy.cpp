@@ -95,7 +95,7 @@ void OpenGLWidgetDummy::resizeGL(int w, int h)
 
 void OpenGLWidgetDummy::paintGL()
 {
-    if(!m_upObjects)
+    if(!m_spObjects)
         return;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -116,7 +116,7 @@ void OpenGLWidgetDummy::paintGL()
     m_program->setUniformValue("lightColor", QVector3D(1.0f, 1.0f, 1.0f));  // White light
 
     // Loop through your parsed IFC geometry and draw each group
-    for (const auto& object : *m_upObjects.get())
+    for (const auto& object : *m_spObjects.get())
     {
         if(!object.meshes)
             continue;
@@ -207,13 +207,11 @@ void OpenGLWidgetDummy::wheelEvent(QWheelEvent *event) {
 }
 
 
-void OpenGLWidgetDummy::setSceneObjects(std::unique_ptr<std::vector<SceneData::Object>>&& upObjects)
+void OpenGLWidgetDummy::setSceneObjects(std::shared_ptr<std::vector<SceneData::Object>> spObjects)
 {
-    m_upObjects = nullptr;
-    if(!upObjects)
+    m_spObjects = spObjects;
+    if(!m_spObjects)
         return;
-
-    m_upObjects = std::move(upObjects);
 
     // After parsing, set the initial camera view based on the loaded geometry
     // (You'll need bounding box calculation for your custom geometry)

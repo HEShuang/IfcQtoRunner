@@ -26,10 +26,12 @@ message(STATUS "OCC libs: ${OCC_LIBRARIES}")
 
 include(model/model.cmake)
 include(parse/parse.cmake)
+include(geometry/geometry.cmake)
 
 add_library(IfcCore STATIC
   ${MODEL_SOURCES}
   ${PARSE_SOURCES}
+  ${GEOMETRY_SOURCES}
 )
 
 target_include_directories(IfcCore
@@ -40,6 +42,7 @@ target_include_directories(IfcCore
     ${OCC_INCLUDE_DIRS}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/model>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/parse>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/geometry>
 )
 target_link_libraries(IfcCore
   PRIVATE
