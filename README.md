@@ -9,11 +9,10 @@
 
 **IfcQtoRunner** is a C++/Qt application for working with IFC files. It allows you to:
 
-* **Import** IFC files using IfcOpenShell
-* **Extract and display** the project structure (✅ Done)
-* **Visualize** 3D model while importing (✅ Done)
-* **Explore** each element (⚙️ Ongoing)
-* **Perform** quantity take‑offs (🚧 Upcoming)
+* **Import and Explore** Import IFC files to display the project structure and explore the properties of each building element. (✅ Done)
+* **Live 3D Visualization** Visualize the 3D model in real-time during the import process. (✅ Done)
+* **Quantity Take-Offs** Compute standard IFC quantities (⚙️ Ongoing)
+* **Mobile Support** Port the application to mobile platforms (🚧 Upcoming)
   
 ## Purpose
 
@@ -24,9 +23,9 @@
 ## Features
 
 * **Structure Preview**: Browse building hierarchies down to storeys and elements
-* **Geometry Viewer**: 3D rendering powered Qt OpenGL
+* **Geometry Viewer**: 3D rendering powered by Qt OpenGL
 * **Progressive Rendering**: Rendering while importing
-* **Quantity Take‑off**: Ongoing feature for automated count, area, and volume reporting
+* **Quantity Take‑off**: Ongoing feature for automated quantity calculation
 
 ![demo](https://github.com/user-attachments/assets/b5bfdde2-cf5b-4ea9-a11c-c24c963e53bb)
 
