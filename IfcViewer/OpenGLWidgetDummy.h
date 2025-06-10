@@ -23,7 +23,7 @@ public:
     ~OpenGLWidgetDummy();
 
 public slots:
-    void setSceneObjects(std::unique_ptr<std::vector<SceneData::Object>>&& upObjects);
+    void setSceneObjects(std::shared_ptr<std::vector<SceneData::Object>> spObjects);
 
 protected:
     void initializeGL() override;
@@ -53,7 +53,7 @@ private:
     float m_cameraDistance;
     QPoint m_lastMousePos;
 
-    std::unique_ptr<std::vector<SceneData::Object>> m_upObjects = nullptr;
+    std::shared_ptr<std::vector<SceneData::Object>> m_spObjects = nullptr;
 };
 
 #endif // OPENGLWIDGETDUMMY_H

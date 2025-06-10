@@ -24,13 +24,14 @@ public:
      * Mesh vertices are in local coordinates and should be transformed to get world coordinates.
      * @return pointer to the list of created scene objects
      */
-    std::unique_ptr<std::vector<SceneData::Object>> parseGeometry();
+    std::shared_ptr<std::vector<SceneData::Object>> parseGeometry();
 
     // Define callback types
     using Callback_ObjectReady = std::function<void(std::shared_ptr<SceneData::Object> objectData)>;
     using Callback_ParseFinished = std::function<void(bool success, const std::string& message)>;
 
-    void parseGeometryStream(Callback_ObjectReady onObjectReady, Callback_ParseFinished onParseFinished);
+    void parseGeometryFlow(Callback_ObjectReady onObjectReady, Callback_ParseFinished onParseFinished);
+
 };
 
 #endif // IFCPREVIEW_H

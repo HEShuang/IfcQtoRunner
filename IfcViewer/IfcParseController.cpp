@@ -33,7 +33,7 @@ void IfcParseController::startParsing(const QString& filePath) {
     };
 
     // Start the parsing in a new std::thread
-    m_workerThread = std::thread(&IfcPreview::parseGeometryStream,
+    m_workerThread = std::thread(&IfcPreview::parseGeometryFlow,
                       m_parserInstance.get(),
                       callback_objectReady,
                       callback_finished
