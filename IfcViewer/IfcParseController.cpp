@@ -1,5 +1,5 @@
 #include "IfcParseController.h"
-#include "IfcPreview.h"
+#include "IfcParser.h"
 #include <QMetaObject>
 
 IfcParseController::IfcParseController(QObject *parent) : QObject(parent) {}
@@ -15,7 +15,7 @@ void IfcParseController::startParsing(const QString& filePath) {
         m_workerThread.join(); // Wait for any previous parsing to finish
     }
 
-    m_parserInstance = std::make_unique<IfcPreview>(filePath.toStdString());
+    m_parserInstance = std::make_unique<IfcParser>(filePath.toStdString());
 
 
     auto callback_objectReady = [this](std::shared_ptr<SceneData::Object> objData){
@@ -33,7 +33,7 @@ void IfcParseController::startParsing(const QString& filePath) {
     };
 
     // Start the parsing in a new std::thread
-    m_workerThread = std::thread(&IfcPreview::parseGeometryFlow,
+    m_workerThread = std::thread(&IfcParser::parseGeometryFlow,
                       m_parserInstance.get(),
                       callback_objectReady,
                       callback_finished

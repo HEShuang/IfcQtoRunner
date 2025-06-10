@@ -5,7 +5,7 @@
 #include <QFileDialog>
 #include <QElapsedTimer>
 
-#include "IfcPreview.h"
+#include "IfcParser.h"
 #include "IfcPreviewWidget.h"
 #include "IfcParseController.h"
 #include "OpenGLWidget.h"
@@ -51,8 +51,8 @@ void MainWindow::loadIfcFile()
 
     ui->labelStatus->setText(m_sCurrentFile);
 
-    IfcPreview ifcPreview(m_sCurrentFile.toStdString());
-    m_pPreviewTree->loadTree(ifcPreview.createPreviewTree());
+    IfcParser ifcParser(m_sCurrentFile.toStdString());
+    m_pPreviewTree->loadTree(ifcParser.createPreviewTree());
 
     m_pGLWidget->clearScene(); // Clear previous model
 

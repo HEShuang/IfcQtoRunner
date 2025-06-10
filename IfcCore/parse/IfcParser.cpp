@@ -1,4 +1,4 @@
-#include "IfcPreview.h"
+#include "IfcParser.h"
 
 #include <iostream>
 #include <string>
@@ -34,14 +34,14 @@ if (schema_version == BOOST_PP_STRINGIZE(elem))                         \
 }                                                                       \
 else                                                                    \
 
-IfcPreview::IfcPreview(const std::string& file): m_sFile(file), m_ifcFile(file)
+IfcParser::IfcParser(const std::string& file): m_sFile(file), m_ifcFile(file)
 {
     if(!m_ifcFile.good())
         std::cerr << "Unable to parse .ifc file" << std::endl;
 }
 
 
-std::unique_ptr<DataNode::Base> IfcPreview::createPreviewTree()
+std::unique_ptr<DataNode::Base> IfcParser::createPreviewTree()
 {
     auto schema_version = m_ifcFile.schema()->name().substr(3);
     std::transform(schema_version.begin(), schema_version.end(), schema_version.begin(), [](const char& c) {
@@ -61,14 +61,14 @@ std::unique_ptr<DataNode::Base> IfcPreview::createPreviewTree()
     return builder.buildTreeByStorey(m_ifcFile, *adapter);
 }
 
-std::shared_ptr<std::vector<SceneData::Object>> IfcPreview::parseGeometry() {
+std::shared_ptr<std::vector<SceneData::Object>> IfcParser::parseGeometry() {
     IfcElemProcessorMesh elemProcessor;
     IfcGeometryParser geomParser;
     geomParser.parse(m_ifcFile, elemProcessor);
     return elemProcessor.getSceneObjects();
 }
 
-void IfcPreview::parseGeometryFlow(Callback_ObjectReady onObjectReady, Callback_ParseFinished onParseFinished) {
+void IfcParser::parseGeometryFlow(Callback_ObjectReady onObjectReady, Callback_ParseFinished onParseFinished) {
     IfcElemProcessorMeshFlow elemProcessor(onObjectReady, onParseFinished);
     IfcGeometryParser geomParser;
     geomParser.parse(m_ifcFile, elemProcessor);
