@@ -1,5 +1,5 @@
-#ifndef IFCPREVIEW_H
-#define IFCPREVIEW_H
+#ifndef IFCPARSER_H
+#define IFCPARSER_H
 
 #include <string>
 #include <ifcparse/IfcFile.h>
@@ -7,13 +7,13 @@
 #include "DataNode.h"
 #include "SceneData.h"
 
-class IfcPreview
+class IfcParser
 {
     std::string m_sFile;
     IfcParse::IfcFile m_ifcFile;
 
 public:
-    IfcPreview(const std::string& file);
+    IfcParser(const std::string& file);
 
     std::unique_ptr<DataNode::Base> createPreviewTree();
 
@@ -40,4 +40,4 @@ public:
 
 };
 
-#endif // IFCPREVIEW_H
+#endif // IFCPARSER_H

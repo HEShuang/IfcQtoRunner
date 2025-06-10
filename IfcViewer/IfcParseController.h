@@ -8,7 +8,7 @@
 
 #include "SceneData.h"
 
-class IfcPreview;
+class IfcParser;
 
 class IfcParseController : public QObject {
     Q_OBJECT
@@ -29,7 +29,7 @@ private slots:
     void handleParsingFinished(bool success, const QString& message);
 
 private:
-    std::unique_ptr<IfcPreview> m_parserInstance;
+    std::unique_ptr<IfcParser> m_parserInstance;
     std::thread m_workerThread;
 };
 
