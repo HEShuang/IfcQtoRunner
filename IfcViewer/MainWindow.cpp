@@ -81,6 +81,6 @@ void MainWindow::clearIfc()
 {
     m_sCurrentFile.clear();
     ui->labelStatus->clear();
-    m_pPreviewTree->clear();
+    m_pPreviewTree->clearAll();
     m_pGLWidget->clearScene();
 }
