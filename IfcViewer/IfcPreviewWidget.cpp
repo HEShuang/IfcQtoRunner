@@ -6,9 +6,16 @@ IfcPreviewWidget::IfcPreviewWidget(QWidget *parent) : QTreeWidget(parent)
     connect(this, &QTreeWidget::itemSelectionChanged, this, &IfcPreviewWidget::handleItemSelectionChanged);
 }
 
+void IfcPreviewWidget::clearAll()
+{
+    QTreeWidget::clear();
+    m_pItemsToHideByDefault.clear();
+}
+
 void IfcPreviewWidget::loadTree(const std::unique_ptr<DataNode::Base>& upTreeRoot)
 {
-    clear();
+    clearAll();
+
     if(!upTreeRoot)
         return;
 

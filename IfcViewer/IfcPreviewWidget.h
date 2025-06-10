@@ -11,6 +11,7 @@ class IfcPreviewWidget : public QTreeWidget
 
 public:
     IfcPreviewWidget(QWidget *parent = nullptr);
+    void clearAll();
     void loadTree(const std::unique_ptr<DataNode::Base>& upTreeRoot);
     void handleLoadGeometryFinished();
 
