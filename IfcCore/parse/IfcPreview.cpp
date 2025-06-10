@@ -20,19 +20,19 @@
 // For BOOST_PP_SEQ_FOR_EACH and BOOST_PP_STRINGIZE preprocessor macro
 #include <boost/preprocessor/seq/for_each.hpp>
 
-#include "IfcParseHelper.h"
+#include "IfcSchemaStrategyImpl.h"
+#include "IfcStructureBuilder.h"
 #include "IfcGeometryParser.h"
 #include "IfcElemProcessorMesh.h"
 #include "IfcElemProcessorMeshFlow.h"
 
 #define IFC_SCHEMA_SEQ (Ifc4x3_add2)(Ifc4x3)(Ifc4x2)(Ifc4x1)(Ifc4)(Ifc2x3)
-#define PROCESS_FOR_SCHEMA(r, data, elem)                  \
-if (schema_version == BOOST_PP_STRINGIZE(elem))            \
-{                                                          \
-    auto parser = IfcParseHelper<elem>();                  \
-    return parser.createPreviewTree(m_ifcFile); \
-}                                                          \
-else                                                       \
+#define PROCESS_FOR_SCHEMA(r, data, elem)                               \
+if (schema_version == BOOST_PP_STRINGIZE(elem))                         \
+{                                                                       \
+    adapter = std::make_unique<IfcSchemaStrategyImpl<elem>>(m_ifcFile); \
+}                                                                       \
+else                                                                    \
 
 IfcPreview::IfcPreview(const std::string& file): m_sFile(file), m_ifcFile(file)
 {
@@ -49,12 +49,16 @@ std::unique_ptr<DataNode::Base> IfcPreview::createPreviewTree()
     });
     schema_version = "Ifc" + schema_version;
 
-    BOOST_PP_SEQ_FOR_EACH(PROCESS_FOR_SCHEMA,  , IFC_SCHEMA_SEQ)
-    {
+    std::unique_ptr<IfcSchemaStrategyBase> adapter = nullptr;
+
+    BOOST_PP_SEQ_FOR_EACH(PROCESS_FOR_SCHEMA,  , IFC_SCHEMA_SEQ) {
         // The final else to catch unhandled schema version
         throw std::invalid_argument("IFC Schema " + schema_version + " not supported");
         return nullptr;
     }
+
+    IfcStructureBuilder builder;
+    return builder.buildTreeByStorey(m_ifcFile, *adapter);
 }
 
 std::shared_ptr<std::vector<SceneData::Object>> IfcPreview::parseGeometry() {

@@ -30,6 +30,12 @@ public:
     using Callback_ObjectReady = std::function<void(std::shared_ptr<SceneData::Object> objectData)>;
     using Callback_ParseFinished = std::function<void(bool success, const std::string& message)>;
 
+    /**
+     * @brief parseGeometryFlow
+     * Parse geometry from the IFC file supporting callbacks when one object is ready
+     * @param onObjectReady: callback function when the geometry of one object is parsed and ready to render
+     * @param onParseFinished: callback function when all geometry are parsed
+     */
     void parseGeometryFlow(Callback_ObjectReady onObjectReady, Callback_ParseFinished onParseFinished);
 
 };
