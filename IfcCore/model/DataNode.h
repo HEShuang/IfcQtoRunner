@@ -65,11 +65,11 @@ public:
 
         std::string m_guid;
         std::string m_name;
-        boost::optional<double> m_elevation;
+        std::optional<double> m_elevation;
         std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> m_objectGuidsNamesByType; //object type _ list of (<guid, name>)
 
         Storey(){}
-        Storey(const std::string& guid, const std::string& name, const boost::optional<double>& elevation):m_guid(guid), m_name(name), m_elevation(elevation) {}
+        Storey(const std::string& guid, const std::string& name, const std::optional<double>& elevation):m_guid(guid), m_name(name), m_elevation(elevation) {}
 
         bool operator < (const Storey& other) const
         {
